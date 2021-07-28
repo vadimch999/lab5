@@ -3,6 +3,6 @@
 
 
 int main() {
-    throwError("Hello world!");
+    throwError("Hello world %d %s!");
     return 0;
 }

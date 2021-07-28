@@ -22,25 +22,35 @@ typedef struct Info {
     int y;
 } Info;
 
-//  Узел списка
+//  Узел
 typedef struct Node {
     Info* info;
-    double weight;
-    struct Node* next;
+    struct GraphNode* next;
 } Node;
+
+typedef struct GraphNode {
+    Node* node;
+    double weight;
+    struct GraphNode* next;
+} GraphNode;
 
 typedef struct Graph {
     int count;
-    Info** nodes;
-    Node** adjList;
+    Node* adjList;
 } Graph;
 
 
 
-Node* createNode(Info* info, double weigh);
-Node* addNode(Node* node, Info* info, double weight);
-Node* removeNode(Node* node, Node* toDel);
-double getWeight(Info* first, Info* second);
+GraphNode* createGNode(Node* node, double weigh);
+GraphNode* addGNode(Node* node, Node* toAdd);
+GraphNode* removeGNode(Node* node, Node* toDel);
+GraphNode* findGNode(Node* node, Node* toFind);
+
+Graph* createGraph();
+Node* addVert(Graph* graph, Info* info);
+Node* findVert(Graph* graph, char* name);
+GraphNode* addEdge(Graph* graph, char* outcome, char* income);
+double getWeight(Node* first, Node* second);
 void throwError(char* error);
 
 #endif
