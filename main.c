@@ -1,8 +1,8 @@
 #include <stdio.h>
-#include "Graph/Graph.h"
+#include "Menu/Menu.h"
 
 
 int main() {
-    throwError("Hello world %d %s!");
+    menu();
     return 0;
 }

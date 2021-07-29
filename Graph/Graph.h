@@ -1,14 +1,11 @@
 #ifndef LAB5_GRAPH_H
 #define LAB5_GRAPH_H
 
-#define BLK "\e[0;30m"
 #define RED "\e[0;31m"
-#define GRN "\e[0;32m"
-#define YEL "\e[0;33m"
-#define BLU "\e[0;34m"
-#define MAG "\e[0;35m"
-#define CYN "\e[0;36m"
-#define WHT "\e[0;37m"
+#define GRN "\x1B[92m"
+#define WHT "\033[0m"
+
+
 
 
 #include <stdio.h>
@@ -43,14 +40,17 @@ typedef struct Graph {
 
 GraphNode* createGNode(Node* node, double weigh);
 GraphNode* addGNode(Node* node, Node* toAdd);
-GraphNode* removeGNode(Node* node, Node* toDel);
+Node* removeGNode(Node* node, Node* toDel);
 GraphNode* findGNode(Node* node, Node* toFind);
 
 Graph* createGraph();
 Node* addVert(Graph* graph, Info* info);
 Node* findVert(Graph* graph, char* name);
-GraphNode* addEdge(Graph* graph, char* outcome, char* income);
+GraphNode* addEdge(Graph* graph, char* out, char* in);
 double getWeight(Node* first, Node* second);
+void removeList(GraphNode* node);
 void throwError(char* error);
+Node* removeVert(Graph* graph, char* name);
+Node* removeEdg(Graph* graph, char* from, char* to);
 
 #endif
