@@ -6,14 +6,17 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "../Messages/Messages.h"
+
 #define textMenu    "1. New empty graph\n"          \
                     "2. Add vertex\n"            \
                     "3. Add edge\n"          \
                     "4. Display graph\n"            \
                     "5. Remove vertex\n"      \
                     "6. Remove edge\n" \
-                    "7. ...\n"       \
-                    "8. ...\n"        \
+                    "7. Write to file\n"       \
+                    "8. Read from file\n"           \
+                    "9. BFS\n"                                \
                     "0. exit\n"                 \
 
 
@@ -35,7 +38,13 @@ void removeEdge(Graph* graph);
 
 void deleteGraph(Graph* graph);
 
+
+Graph* readFromFile(char* path);
+void readGraph(Graph** graph);
+Graph* writeToFile(Graph* graph, char* path);
+void writeGraph(Graph* graph);
 int getInt(int min, int max);
-void success();
+
+void startBFS(Graph* graph);
 
 #endif

@@ -1,17 +1,14 @@
 #ifndef LAB5_GRAPH_H
 #define LAB5_GRAPH_H
 
-#define RED "\e[0;31m"
-#define GRN "\x1B[92m"
-#define WHT "\033[0m"
-
-
 
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+
+#include "../Messages/Messages.h"
 
 typedef struct Info {
     char* name;
@@ -49,8 +46,12 @@ Node* findVert(Graph* graph, char* name);
 GraphNode* addEdge(Graph* graph, char* out, char* in);
 double getWeight(Node* first, Node* second);
 void removeList(GraphNode* node);
-void throwError(char* error);
 Node* removeVert(Graph* graph, char* name);
 Node* removeEdg(Graph* graph, char* from, char* to);
+int countEdges(Node* node);
+int indexOfNode(Graph* graph, Node* node);
+void bfs(Graph* graph, char* name, char* toFind);
+#include "../Queue/Queue.h"
+
 
 #endif

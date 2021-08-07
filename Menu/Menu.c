@@ -39,7 +39,7 @@ void menu() {
     while (option) {
         printf(textMenu);
         printf("Choose option: ");
-        option = getInt(0, 8);
+        option = getInt(0, 9);
         switch (option) {
             case 1: {
                 createNewGraph(&graph);
@@ -66,11 +66,15 @@ void menu() {
                 break;
             }
             case 7: {
-//                readFromFile(&root);
+                writeGraph(graph);
                 break;
             }
             case 8: {
-//                writeToFile(root);
+                readGraph(&graph);
+                break;
+            }
+            case 9: {
+                startBFS(graph);
                 break;
             }
             default: {
@@ -254,6 +258,156 @@ void deleteGraph(Graph* graph) {
     free(graph);
 }
 
-void success() {
-    printf("\n%sSuccess%s\n\n", GRN, WHT);
+Graph* readFromFile(char* path) {
+    FILE* fp = fopen(path, "rb");
+    if (!fp) {
+        throwError("Cannot open that file!");
+        return NULL;
+    }
+
+    Graph* graph = createGraph();
+
+    int count;
+    fread(&count, sizeof(int), 1, fp);
+
+    int length;
+    char* name;
+    Info* info;
+    int x, y;
+
+    for (int i = 0; i < count; i++) {
+        fread(&length, sizeof(int), 1, fp);
+        name = (char*) malloc(sizeof(char) * length);
+        fread(name, sizeof(char), length, fp);
+        fread(&x, sizeof(int), 1, fp);
+        fread(&y, sizeof(int), 1, fp);
+
+        info = createInfo(name, x, y);
+        if ( !addVert(graph, info) ) {
+            throwError("Unexpected error!");
+            exit(1);
+        }
+    }
+
+    GraphNode* gNode;
+    int index;
+    int edgeCount;
+    for (int i = 0; i < count; i++) {
+        fread(&edgeCount, sizeof(int), 1, fp);
+        while (edgeCount--) {
+            fread(&index, sizeof(int), 1, fp);
+            gNode = addEdge(
+                    graph,
+                    graph->adjList[i].info->name,
+                    graph->adjList[index].info->name
+                    );
+            if (!gNode) {
+                throwError("Unexpected error!");
+                exit(1);
+            }
+        }
+    }
+    return graph;
 }
+
+void readGraph(Graph** graph) {
+    if (*graph) {
+        printf("The existed graph will be erased. Continue?\n");
+        printf("0. Yes\n1. No\n");
+        printf("Choose option: ");
+        int option = getInt(0, 1);
+        if (option)
+            return;
+        else {
+            deleteGraph(*graph);
+            *graph = NULL;
+        }
+    }
+
+    printf("Enter file path: ");
+    char* path = getStr();
+
+    *graph = readFromFile(path);
+
+    free(path);
+    if (*graph)
+        success();
+}
+
+Graph* writeToFile(Graph* graph, char* path) {
+    FILE* fp = fopen(path, "wb");
+    if (!fp) {
+        throwError("Cannot open that file!");
+        return NULL;
+    }
+
+    int count = graph->count;
+    fwrite(&(count), sizeof(int), 1, fp);
+
+    int length;
+
+    for (int i = 0; i < count; i++) {
+        length = (int) strlen(graph->adjList[i].info->name) + 1;
+        fwrite( &length, sizeof(int), 1, fp);
+        fwrite( graph->adjList[i].info->name,
+                sizeof(char), length, fp);
+        fwrite( &(graph->adjList[i].info->x),
+                sizeof(int), 1, fp);
+        fwrite( &(graph->adjList[i].info->y),
+                sizeof(int), 1, fp);
+    }
+
+    int edgeCount;
+    int index;
+    GraphNode* gNode;
+
+    for (int i = 0; i < count; i++) {
+        edgeCount = countEdges(graph->adjList + i);
+        if (!edgeCount)
+            continue;
+
+        fwrite(&edgeCount, sizeof(int), 1, fp);
+        gNode = graph->adjList[i].next;
+        for (int j = 0; j < edgeCount; j++) {
+            index = indexOfNode(graph, gNode->node);
+            fwrite(&index, sizeof(int), 1, fp);
+            gNode = gNode->next;
+        }
+    }
+
+    fclose(fp);
+    return graph;
+}
+
+void writeGraph(Graph* graph) {
+    if (!graph || !graph->count) {
+        throwError("Graph is empty!");
+        return;
+    }
+
+    printf("Enter file path: ");
+    char* path = getStr();
+
+    if ( writeToFile(graph, path) )
+        success();
+
+    free(path);
+}
+
+void startBFS(Graph* graph) {
+    if (!graph) {
+        throwError("Graph is empty!");
+        return;
+    }
+    printf("Enter name of the vertex to start finding from: ");
+    char* name = getStr();
+    printf("Enter name of the vertex to find: ");
+    char* toFind = getStr();
+
+    bfs(graph, name, toFind);
+
+
+    free(name);
+    free(toFind);
+}
+

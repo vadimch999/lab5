@@ -230,6 +230,74 @@ double getWeight(Node* first, Node* second) {
     return sqrt(xDist * xDist + yDist * yDist);
 }
 
-void throwError(char* error) {
-    printf("\n%s%s%s\n\n", RED, error, WHT);
+int countEdges(Node* node) {
+    if (!node) {
+        throwError("Node does`t exist!");
+        return -1;
+    }
+    GraphNode* gNode = node->next;
+    int count = 0;
+    while (gNode) {
+        count++;
+        gNode = gNode->next;
+    }
+    return count;
+}
+
+int indexOfNode(Graph* graph, Node* node) {
+    int index = (int) (node - graph->adjList);
+    return index;
+}
+
+void bfs(Graph* graph, char* name, char* toFind) {
+    Node* node = findVert(graph, name);
+    if (!node) {
+        throwError("Vertex doesn't exist!");
+        return;
+    }
+
+    Node* nodeToFind = findVert(graph, toFind);
+    if (!nodeToFind) {
+        throwError("Vertex to find doesn't exist!");
+        return;
+    }
+
+    if (!strcmp(name, toFind)) {
+        throwError("These are the same node!");
+        return;
+    }
+
+    int vertex = indexOfNode(graph, node);
+
+    Queue* queue = createQueue(graph->count);
+    int* visited = (int*) calloc(graph->count, sizeof(int));
+
+    visited[vertex] = 1;
+    enqueue(queue, vertex);
+    GraphNode* temp;
+
+    while (!isEmpty(queue)) {
+//        printQueue(queue);
+        int currentVertex = dequeue(queue);
+        temp = graph->adjList[currentVertex].next;
+
+        while (temp) {
+            int adjVertex = indexOfNode(graph, temp->node);
+            if ( !strcmp(temp->node->info->name, toFind) ) {
+                printf("\n%s%s is reachable from %s%s\n\n", GRN, toFind, name, WHT);
+                free(visited);
+                removeQueue(queue);
+                return;
+            }
+
+            if (visited[adjVertex] == 0) {
+                visited[adjVertex] = 1;
+                enqueue(queue, adjVertex);
+            }
+            temp = temp->next;
+        }
+    }
+    free(visited);
+    removeQueue(queue);
+    printf("\n%s%s is NOT reachable from %s%s\n\n", RED, toFind, name, WHT);
 }
