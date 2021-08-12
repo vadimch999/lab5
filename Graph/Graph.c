@@ -84,13 +84,15 @@ GraphNode* findGNode(Node* node, Node* toFind) {
         return NULL;
     }
 
+
     if (!node->next)
         return NULL;
 
     GraphNode* gNode = node->next;
+    Node* tmp;
 
     do {
-        if (gNode->node == toFind)
+        if (!strcmp(gNode->node->info->name, toFind->info->name))
             return gNode;
         gNode = gNode->next;
     } while (gNode);
@@ -249,24 +251,7 @@ int indexOfNode(Graph* graph, Node* node) {
     return index;
 }
 
-void bfs(Graph* graph, char* name, char* toFind) {
-    Node* node = findVert(graph, name);
-    if (!node) {
-        throwError("Vertex doesn't exist!");
-        return;
-    }
-
-    Node* nodeToFind = findVert(graph, toFind);
-    if (!nodeToFind) {
-        throwError("Vertex to find doesn't exist!");
-        return;
-    }
-
-    if (!strcmp(name, toFind)) {
-        throwError("These are the same node!");
-        return;
-    }
-
+bool bfs(Graph* graph, Node* node, Node* nodeToFind) {
     int vertex = indexOfNode(graph, node);
 
     Queue* queue = createQueue(graph->count);
@@ -283,11 +268,10 @@ void bfs(Graph* graph, char* name, char* toFind) {
 
         while (temp) {
             int adjVertex = indexOfNode(graph, temp->node);
-            if ( !strcmp(temp->node->info->name, toFind) ) {
-                printf("\n%s%s is reachable from %s%s\n\n", GRN, toFind, name, WHT);
+            if ( !strcmp(temp->node->info->name, nodeToFind->info->name) ) {
                 free(visited);
                 removeQueue(queue);
-                return;
+                return true;
             }
 
             if (visited[adjVertex] == 0) {
@@ -299,5 +283,151 @@ void bfs(Graph* graph, char* name, char* toFind) {
     }
     free(visited);
     removeQueue(queue);
-    printf("\n%s%s is NOT reachable from %s%s\n\n", RED, toFind, name, WHT);
+    return false;
 }
+
+// Function that implements Dijkstra's single source shortest path algorithm
+// for a graph represented using adjacency matrix representation
+double dijkstra(Graph* graph, char* name, char* destName)
+{
+    Node* node = findVert(graph, name);
+    if (!node) {
+        throwError("There is no such node with start name!");
+        return -1;
+    }
+    Node* destNode = findVert(graph, destName);
+    if (!destNode) {
+        throwError("There is no such node with destination name");
+        return -1;
+    }
+
+    int destIndex = indexOfNode(graph, destNode);
+
+    int src = indexOfNode(graph, node);
+    int V = graph->count;
+    double* dist = (double*) malloc(sizeof(double) * V); // The output array.  dist[i] will hold the shortest
+    // distance from src to i
+
+    bool* sptSet = (bool*) malloc(sizeof(bool) * V); // sptSet[i] will be true if vertex i is included in shortest
+    // path tree or shortest distance from src to i is finalized
+
+    // Initialize all distances as INFINITE and stpSet[] as false
+    for (int i = 0; i < V; i++) {
+        dist[i] = DBL_MAX;   //  -1 means infinity since weight is positive
+        sptSet[i] = false;
+    }
+
+    // Distance of source vertex from itself is always 0
+    dist[src] = 0;
+    GraphNode* distNode;
+
+    // Find shortest path for all vertices
+    for (int count = 0; count < V; count++) {
+
+        // Pick the minimum distance vertex from the set of vertices not
+        // yet processed. u is always equal to src in the first iteration.
+        int u = minDistance(V, dist, sptSet);
+
+
+        // Mark the picked vertex as processed
+        sptSet[u] = true;
+
+
+        // Update dist value of the adjacent vertices of the picked vertex.
+        for (int v = 0; v < V; v++) {
+            distNode = findGNode(graph->adjList + u, graph->adjList + v);
+            if (src == v)
+                dist[v] = 0;
+            // Update dist[v] only if is not in sptSet, there is an edge from
+            // u to v, and total weight of path from src to  v through u is
+            // smaller than current value of dist[v]
+            else if (!sptSet[v] && distNode && dist[u] != DBL_MAX
+                && dist[u] + distNode->weight < dist[v])
+                dist[v] = dist[u] + distNode->weight;
+        }
+    }
+
+    // print the constructed distance array
+//    for (int i = 0; i < V; i++)
+//        printf("%d: %f\n", i, dist[i]);
+
+    double distance = dist[destIndex];
+
+    free(sptSet);
+    free(dist);
+    return distance;
+}
+
+int minDistance(int V, double* dist, bool* sptSet)
+{
+    // Initialize min value
+    double min = DBL_MAX;
+    int min_index;
+    bool flag = true;
+
+    for (int v = 0; v < V; v++)
+        if (sptSet[v] == false && dist[v] >= 0 && dist[v] <= min) {
+            min = dist[v];
+            min_index = v;
+            flag = false;
+        }
+
+    if (flag == true) {
+        for (int v = 0; v < V; v++)
+            if (sptSet[v] == false && dist[v] < 0) {
+                min_index = v;
+                break;
+            }
+    }
+
+    return min_index;
+}
+
+//// Returns the maximum flow from s to t in the given graph
+//int fordFulkerson(Graph* graph, int s, int t)
+//{
+//    int u, v;
+//    int graph[V][V]
+//    // Create a residual graph and fill the residual graph
+//    // with given capacities in the original graph as
+//    // residual capacities in residual graph
+//    int rGraph[V][V]; // Residual graph where rGraph[i][j]
+//    // indicates residual capacity of edge
+//    // from i to j (if there is an edge. If
+//    // rGraph[i][j] is 0, then there is not)
+//    for (u = 0; u < V; u++)
+//        for (v = 0; v < V; v++)
+//            rGraph[u][v] = graph[u][v];
+//
+//    int parent[V]; // This array is filled by BFS and to
+//    // store path
+//
+//    int max_flow = 0; // There is no flow initially
+//
+//    // Augment the flow while tere is path from source to
+//    // sink
+//    while (bfs(rGraph, s, t, parent)) {
+//        // Find minimum residual capacity of the edges along
+//        // the path filled by BFS. Or we can say find the
+//        // maximum flow through the path found.
+//        double path_flow = DBL_MAX;
+//        for (v = t; v != s; v = parent[v]) {
+//            u = parent[v];
+//            path_flow = path_flow < rGraph[u][v] ? path_flow : rGraph[u][v];
+//        }
+//
+//        // update residual capacities of the edges and
+//        // reverse edges along the path
+//        for (v = t; v != s; v = parent[v]) {
+//            u = parent[v];
+//            rGraph[u][v] -= path_flow;
+//            rGraph[v][u] += path_flow;
+//        }
+//
+//        // Add path flow to overall flow
+//        max_flow += path_flow;
+//    }
+//
+//    // Return the overall flow
+//    return max_flow;
+//}

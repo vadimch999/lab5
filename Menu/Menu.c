@@ -39,7 +39,7 @@ void menu() {
     while (option) {
         printf(textMenu);
         printf("Choose option: ");
-        option = getInt(0, 9);
+        option = getInt(0, 10);
         switch (option) {
             case 1: {
                 createNewGraph(&graph);
@@ -75,6 +75,10 @@ void menu() {
             }
             case 9: {
                 startBFS(graph);
+                break;
+            }
+            case 10: {
+                dijkstraAlg(graph);
                 break;
             }
             default: {
@@ -404,10 +408,54 @@ void startBFS(Graph* graph) {
     printf("Enter name of the vertex to find: ");
     char* toFind = getStr();
 
-    bfs(graph, name, toFind);
+    Node* node = findVert(graph, name);
+    if (!node) {
+        throwError("Vertex doesn't exist!");
+        return;
+    }
+
+    Node* nodeToFind = findVert(graph, toFind);
+    if (!nodeToFind) {
+        throwError("Vertex to find doesn't exist!");
+        return;
+    }
+
+    if (!strcmp(name, toFind)) {
+        throwError("These are the same node!");
+        return;
+    }
+
+    bool result = bfs(graph, node, nodeToFind);
+
+    if (result == true)
+        printf("\n%s%s is reachable from %s%s\n\n", GRN, toFind, name, WHT);
+    else
+        printf("\n%s%s is NOT reachable from %s%s\n\n", RED, toFind, name, WHT);
+
 
 
     free(name);
     free(toFind);
 }
 
+void dijkstraAlg(Graph* graph) {
+    if (!graph) {
+        throwError("Graph is empty!");
+        return;
+    }
+    printf("Enter node name to start from: ");
+    char* name = getStr();
+    printf("Enter destination node name: ");
+    char* destName = getStr();
+    double distance = dijkstra(graph, name, destName);
+    free(name);
+    free(destName);
+
+    if (distance < 0)
+        return;
+    else if (distance == DBL_MAX) {
+        throwError("Infinity");
+    } else {
+        printf("\nThe shortest path distance is %f\n\n", distance);
+    }
+}

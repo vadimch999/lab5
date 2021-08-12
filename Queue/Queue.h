@@ -7,7 +7,6 @@
 
 
 typedef struct Queue {
-    int size;
     int* items;
     int front;
     int rear;

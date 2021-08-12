@@ -2,7 +2,6 @@
 
 Queue* createQueue(int size) {
     Queue* queue = (Queue*) malloc(sizeof(Queue));
-    queue->size = size;
     queue->items = (int*) malloc(sizeof(int) * size);
     queue->front = -1;
     queue->rear = -1;

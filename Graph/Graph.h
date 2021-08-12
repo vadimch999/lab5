@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <stdbool.h>
+#include <float.h>
 
 #include "../Messages/Messages.h"
 
@@ -50,7 +52,10 @@ Node* removeVert(Graph* graph, char* name);
 Node* removeEdg(Graph* graph, char* from, char* to);
 int countEdges(Node* node);
 int indexOfNode(Graph* graph, Node* node);
-void bfs(Graph* graph, char* name, char* toFind);
+bool bfs(Graph* graph, Node* node, Node* nodeToFind);
+double dijkstra(Graph* graph, char* name, char* distName);
+
+int minDistance(int V, double* dist, bool* sptSet);
 #include "../Queue/Queue.h"
 
 

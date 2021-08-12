@@ -16,7 +16,8 @@
                     "6. Remove edge\n" \
                     "7. Write to file\n"       \
                     "8. Read from file\n"           \
-                    "9. BFS\n"                                \
+                    "9. BFS\n"                      \
+                    "10. Dijkstra\n"                                \
                     "0. exit\n"                 \
 
 
@@ -46,5 +47,6 @@ void writeGraph(Graph* graph);
 int getInt(int min, int max);
 
 void startBFS(Graph* graph);
+void dijkstraAlg(Graph* graph);
 
 #endif
