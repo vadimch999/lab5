@@ -49,14 +49,3 @@ void removeQueue(Queue* queue) {
 }
 
 
-//  For debug
-
-void printQueue(Queue* queue) {
-    if (isEmpty(queue)) {
-    } else {
-        printf("\nQueue contains \n");
-        for (int i = queue->front; i < queue->rear + 1; i++) {
-            printf("%d ", queue->items[i]);
-        }
-    }
-}

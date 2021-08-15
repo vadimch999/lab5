@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <float.h>
+#include <time.h>
 
 #include "../Messages/Messages.h"
 
@@ -18,45 +19,68 @@ typedef struct Info {
     int y;
 } Info;
 
-//  Узел
+//  Узел графа
 typedef struct Node {
     Info* info;
-    struct GraphNode* next;
+    struct GraphNode* list;
 } Node;
 
+//  Узел списка смежности
 typedef struct GraphNode {
     Node* node;
     double weight;
     struct GraphNode* next;
 } GraphNode;
 
+//  Структура графа
 typedef struct Graph {
     int count;
     Node* adjList;
 } Graph;
 
-
-
-GraphNode* createGNode(Node* node, double weigh);
-GraphNode* addGNode(Node* node, Node* toAdd);
-Node* removeGNode(Node* node, Node* toDel);
-GraphNode* findGNode(Node* node, Node* toFind);
-
-Graph* createGraph();
+//  Добавление вершины в граф. Сложность O(1)
 Node* addVert(Graph* graph, Info* info);
+//  Поиск вершины в графе. Сложность O(N)
 Node* findVert(Graph* graph, char* name);
+//  Добавление вершины в граф. Сложность O(N)
 GraphNode* addEdge(Graph* graph, char* out, char* in);
-double getWeight(Node* first, Node* second);
-void removeList(GraphNode* node);
+//  Удаление вершины в графе. Сложность O(N^2)
 Node* removeVert(Graph* graph, char* name);
+//  Удаление ребра в графе. Сложность O(N)
 Node* removeEdg(Graph* graph, char* from, char* to);
-int countEdges(Node* node);
-int indexOfNode(Graph* graph, Node* node);
+//  Поиск в ширину. Сложность O(N^2)
 bool bfs(Graph* graph, Node* node, Node* nodeToFind);
+//  Алгоритм Дейкстра. Сложность O(N^3)
 double dijkstra(Graph* graph, char* name, char* distName);
 
+//  Возващает вес ребра между двумя вершинами
+double getWeight(Node* first, Node* second);
+//  Удаление списка смежности
+void removeList(GraphNode* node);
+//  Возвращает положительную степеть вершины
+int countEdges(Node* node);
+//  Возвращает индекс вершины в массиве
+int indexOfNode(Graph* graph, Node* node);
+//  Возвращает минимальное расстояние в массиве
 int minDistance(int V, double* dist, bool* sptSet);
+
+
+//  Создаёт структуру информации.
+Info* createInfo(char* name, int x, int y);
+//  Создаёт узел списка смежности. Выделяет память
+GraphNode* createGNode(Node* node, double weigh);
+//  Добавляет новый элемент в список смежности
+GraphNode* addGNode(Node* node, Node* toAdd);
+//  Удаляет элемент из списка смежности
+Node* removeGNode(Node* node, Node* toDel);
+//  Поиск элемента в списке смежности
+GraphNode* findGNode(Node* node, Node* toFind);
+//  Выделяется память под пустой граф
+Graph* createGraph();
+//  Создаёт рандомный граф
+Graph* getRandomGraph(int count);
+
+//  Создаёт копию графа. Не используется.
+Graph* cloneGraph(Graph* graph);
 #include "../Queue/Queue.h"
-
-
 #endif

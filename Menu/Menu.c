@@ -23,23 +23,17 @@ char* getStr() {
     return ptr;
 }
 
-Info* createInfo(char* name, int x, int y) {
-    Info* info = (Info*) malloc(sizeof(Info));
-
-    info->name = name;
-    info->x = x;
-    info->y = y;
-
-    return info;
-}
-
 void menu() {
-    Graph* graph = NULL;
+    Graph* graph = readFromFile(LOAD_PATH);
     int option = 1;
+
+    if (graph)
+        successMessage("Graph is loaded");
+
     while (option) {
         printf(textMenu);
         printf("Choose option: ");
-        option = getInt(0, 10);
+        option = getInt(0, 12);
         switch (option) {
             case 1: {
                 createNewGraph(&graph);
@@ -81,7 +75,17 @@ void menu() {
                 dijkstraAlg(graph);
                 break;
             }
+            case 11: {
+                randomGraph(&graph);
+                break;
+            }
+            case 12: {
+                timing();
+                break;
+            }
             default: {
+                writeToFile(graph, LOAD_PATH);
+                successMessage("Graph is saved");
                 deleteGraph(graph);
                 option = 0;
                 break;
@@ -180,7 +184,7 @@ void displayGraph(Graph* graph) {
     printf("\n");
     for (int i = 0; i < graph->count; i++) {
         printf("Name: %s : { ", graph->adjList[i].info->name);
-        gNode = graph->adjList[i].next;
+        gNode = graph->adjList[i].list;
 
         if (!gNode) {
             printf("}\n");
@@ -253,7 +257,7 @@ void deleteGraph(Graph* graph) {
 
     for (int i = 0; i < graph->count; i++) {
         node = &(graph->adjList[i]);
-        removeList(node->next);
+        removeList(node->list);
         free(node->info->name);
         free(node->info);
     }
@@ -264,10 +268,8 @@ void deleteGraph(Graph* graph) {
 
 Graph* readFromFile(char* path) {
     FILE* fp = fopen(path, "rb");
-    if (!fp) {
-        throwError("Cannot open that file!");
+    if (!fp)
         return NULL;
-    }
 
     Graph* graph = createGraph();
 
@@ -334,8 +336,11 @@ void readGraph(Graph** graph) {
     *graph = readFromFile(path);
 
     free(path);
+
     if (*graph)
         success();
+    else
+        throwError("Cannot open that file!");
 }
 
 Graph* writeToFile(Graph* graph, char* path) {
@@ -371,7 +376,7 @@ Graph* writeToFile(Graph* graph, char* path) {
             continue;
 
         fwrite(&edgeCount, sizeof(int), 1, fp);
-        gNode = graph->adjList[i].next;
+        gNode = graph->adjList[i].list;
         for (int j = 0; j < edgeCount; j++) {
             index = indexOfNode(graph, gNode->node);
             fwrite(&index, sizeof(int), 1, fp);
@@ -458,4 +463,123 @@ void dijkstraAlg(Graph* graph) {
     } else {
         printf("\nThe shortest path distance is %f\n\n", distance);
     }
+}
+
+void randomGraph(Graph** graph) {
+    if (*graph) {
+        printf("The existed graph will be erased. Continue?\n");
+        printf("0. Yes\n1. No\n");
+        printf("Choose option: ");
+        int option = getInt(0, 1);
+        if (option)
+            return;
+        else {
+            deleteGraph(*graph);
+            *graph = NULL;
+        }
+    }
+
+    printf("Enter count (max %d): ", RANDOM_MAX_COUNT);
+    int count = getInt(0, RANDOM_MAX_COUNT);
+    *graph = getRandomGraph(count);
+
+    if (*graph)
+        success();
+}
+
+void timing() {
+    int i, count;
+    Node* root = NULL;
+    clock_t begin, end;
+
+    printf("Enter how many vertices do you want to test (max %d): ", TIMING_MAX_COUNT);
+    count = getInt(0, TIMING_MAX_COUNT);
+
+    Graph* graph = createGraph();
+    char* name;
+    for (int i = 0; i < count; i++) {
+
+    }
+
+    Info** infoArr = (Info**) malloc(sizeof(Info*) * count);
+
+    //  Выделение памяти под строки.
+    printf("Memory allocation...\n");
+    for (i = 0; i < count; i++) {
+        name = (char*) malloc(sizeof(char) * 3);
+        name[0] = (char) ( i % 127 + 1 );
+        name[1] = (char) ( i / 127 > 0 ? i % 127 + 1 : 1);
+        name[2] = '\0';
+
+        infoArr[i] = createInfo(name, i, i);
+    }
+    printf("Memory was successfully allocated\n\n");
+
+    // Таймирование функции вставки вершины
+
+    printf("Vertex adding...\n");
+    begin = clock();
+
+    for (i = 0; i < count; i++)
+        addVert(graph, infoArr[i]);
+
+    end = clock();
+
+    printf("Time of vertex adding: %f * 10^-3\n\n", (double)(end - begin) * 1000 / CLOCKS_PER_SEC );
+
+    // Таймирование функции добавления ребра из каждой вершины в каждую
+    printf("Edge adding...\n");
+    begin = clock();
+
+    for (i = 0; i < count; i++)
+        for (int j = 0; j < count; j++)
+            addEdge(graph, infoArr[i]->name, infoArr[j]->name);
+
+    end = clock();
+
+    printf("Time of edge adding: %f * 10^-3\n\n", (double)(end - begin) * 1000 / CLOCKS_PER_SEC );
+
+    // Таймирование функции поиска элемента в дереве.
+    printf("Vertex finding...\n");
+    begin = clock();
+
+    for (i = 0; i < count; i++)
+        findVert(graph, infoArr[i]->name);
+
+    end = clock();
+
+    printf("Time of vertex finding: %f * 10^-3\n\n", (double)(end - begin) * 1000 / CLOCKS_PER_SEC);
+
+    // Таймирование BFS.
+    printf("Breadth first search testing...\n");
+    begin = clock();
+
+    for (i = 0; i < count; i++)
+        for (int j = 0; j < count; j++)
+            bfs(graph, graph->adjList + i, graph->adjList + j);
+
+    end = clock();
+
+    printf("Time of BFS: %f * 10^-3\n\n", (double)(end - begin) * 1000 / CLOCKS_PER_SEC);
+
+    // Таймирование Dijkstra.
+    printf("Dijkstra testing...\n");
+    begin = clock();
+
+    for (i = 0; i < count; i++)
+        for (int j = 0; j < count; j++)
+            dijkstra(graph, infoArr[i]->name, infoArr[j]->name);
+
+    end = clock();
+
+    printf("Time of Dijkstra: %f * 10^-3\n\n", (double)(end - begin) * 1000 / CLOCKS_PER_SEC);
+
+    // Таймирование функции удаления графа.
+    printf("Graph deleting...\n");
+    begin = clock();
+    deleteGraph(graph);
+    end = clock();
+
+    printf("Time of element deleting: %f * 10^-3\n\n", (double)(end - begin) * 1000 / CLOCKS_PER_SEC);
+    free(infoArr);
 }

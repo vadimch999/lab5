@@ -15,11 +15,11 @@ GraphNode* addGNode(Node* node, Node* toAdd) {
     }
 
     double weight = getWeight(node, toAdd);
-    GraphNode* gNode = node->next;
+    GraphNode* gNode = node->list;
 
     if (!gNode) {
-        node->next = createGNode(toAdd, weight);
-        return node->next;
+        node->list = createGNode(toAdd, weight);
+        return node->list;
     }
 
     while (gNode->next) {
@@ -37,7 +37,7 @@ Node* removeGNode(Node* node, Node* toDel) {
         return NULL;
     }
 
-    GraphNode* gNode = node->next;
+    GraphNode* gNode = node->list;
 
     GraphNode* prev = NULL;
     char flag = 0;
@@ -56,8 +56,8 @@ Node* removeGNode(Node* node, Node* toDel) {
         return NULL;
     }
 
-    if (gNode == node->next)
-        node->next = gNode->next;
+    if (gNode == node->list)
+        node->list = gNode->next;
 
     if (prev)
         prev->next = gNode->next;
@@ -85,10 +85,10 @@ GraphNode* findGNode(Node* node, Node* toFind) {
     }
 
 
-    if (!node->next)
+    if (!node->list)
         return NULL;
 
-    GraphNode* gNode = node->next;
+    GraphNode* gNode = node->list;
     Node* tmp;
 
     do {
@@ -121,7 +121,7 @@ Node* addVert(Graph* graph, Info* info) {
 
     Node node;
     node.info = info;
-    node.next = NULL;
+    node.list = NULL;
 
     graph->adjList[graph->count - 1] = node;
 
@@ -188,7 +188,7 @@ Node* removeVert(Graph* graph, char* name) {
         removeGNode(refNode, toDel);
     }
 
-    removeList(toDel->next);
+    removeList(toDel->list);
     free(toDel->info->name);
     free(toDel->info);
 
@@ -224,6 +224,16 @@ Node* removeEdg(Graph* graph, char* from, char* to) {
     return fromNode;
 }
 
+Info* createInfo(char* name, int x, int y) {
+    Info* info = (Info*) malloc(sizeof(Info));
+
+    info->name = name;
+    info->x = x;
+    info->y = y;
+
+    return info;
+}
+
 double getWeight(Node* first, Node* second) {
     int xDist = first->info->x - second->info->x;
     int yDist = first->info->y - second->info->y;
@@ -237,7 +247,7 @@ int countEdges(Node* node) {
         throwError("Node does`t exist!");
         return -1;
     }
-    GraphNode* gNode = node->next;
+    GraphNode* gNode = node->list;
     int count = 0;
     while (gNode) {
         count++;
@@ -264,17 +274,18 @@ bool bfs(Graph* graph, Node* node, Node* nodeToFind) {
     while (!isEmpty(queue)) {
 //        printQueue(queue);
         int currentVertex = dequeue(queue);
-        temp = graph->adjList[currentVertex].next;
+        temp = graph->adjList[currentVertex].list;
 
         while (temp) {
             int adjVertex = indexOfNode(graph, temp->node);
-            if ( !strcmp(temp->node->info->name, nodeToFind->info->name) ) {
-                free(visited);
-                removeQueue(queue);
-                return true;
-            }
-
             if (visited[adjVertex] == 0) {
+
+                if ( !strcmp(temp->node->info->name, nodeToFind->info->name) ) {
+                    free(visited);
+                    removeQueue(queue);
+                    return true;
+                }
+
                 visited[adjVertex] = 1;
                 enqueue(queue, adjVertex);
             }
@@ -286,8 +297,6 @@ bool bfs(Graph* graph, Node* node, Node* nodeToFind) {
     return false;
 }
 
-// Function that implements Dijkstra's single source shortest path algorithm
-// for a graph represented using adjacency matrix representation
 double dijkstra(Graph* graph, char* name, char* destName)
 {
     Node* node = findVert(graph, name);
@@ -305,51 +314,35 @@ double dijkstra(Graph* graph, char* name, char* destName)
 
     int src = indexOfNode(graph, node);
     int V = graph->count;
-    double* dist = (double*) malloc(sizeof(double) * V); // The output array.  dist[i] will hold the shortest
-    // distance from src to i
+    double* dist = (double*) malloc(sizeof(double) * V);
 
-    bool* sptSet = (bool*) malloc(sizeof(bool) * V); // sptSet[i] will be true if vertex i is included in shortest
-    // path tree or shortest distance from src to i is finalized
+    bool* sptSet = (bool*) malloc(sizeof(bool) * V);
 
-    // Initialize all distances as INFINITE and stpSet[] as false
     for (int i = 0; i < V; i++) {
-        dist[i] = DBL_MAX;   //  -1 means infinity since weight is positive
+        dist[i] = DBL_MAX;
         sptSet[i] = false;
     }
 
-    // Distance of source vertex from itself is always 0
     dist[src] = 0;
     GraphNode* distNode;
 
-    // Find shortest path for all vertices
     for (int count = 0; count < V; count++) {
-
-        // Pick the minimum distance vertex from the set of vertices not
-        // yet processed. u is always equal to src in the first iteration.
         int u = minDistance(V, dist, sptSet);
 
 
-        // Mark the picked vertex as processed
         sptSet[u] = true;
 
 
-        // Update dist value of the adjacent vertices of the picked vertex.
         for (int v = 0; v < V; v++) {
             distNode = findGNode(graph->adjList + u, graph->adjList + v);
             if (src == v)
                 dist[v] = 0;
-            // Update dist[v] only if is not in sptSet, there is an edge from
-            // u to v, and total weight of path from src to  v through u is
-            // smaller than current value of dist[v]
+
             else if (!sptSet[v] && distNode && dist[u] != DBL_MAX
                 && dist[u] + distNode->weight < dist[v])
                 dist[v] = dist[u] + distNode->weight;
         }
     }
-
-    // print the constructed distance array
-//    for (int i = 0; i < V; i++)
-//        printf("%d: %f\n", i, dist[i]);
 
     double distance = dist[destIndex];
 
@@ -383,51 +376,62 @@ int minDistance(int V, double* dist, bool* sptSet)
     return min_index;
 }
 
-//// Returns the maximum flow from s to t in the given graph
-//int fordFulkerson(Graph* graph, int s, int t)
-//{
-//    int u, v;
-//    int graph[V][V]
-//    // Create a residual graph and fill the residual graph
-//    // with given capacities in the original graph as
-//    // residual capacities in residual graph
-//    int rGraph[V][V]; // Residual graph where rGraph[i][j]
-//    // indicates residual capacity of edge
-//    // from i to j (if there is an edge. If
-//    // rGraph[i][j] is 0, then there is not)
-//    for (u = 0; u < V; u++)
-//        for (v = 0; v < V; v++)
-//            rGraph[u][v] = graph[u][v];
-//
-//    int parent[V]; // This array is filled by BFS and to
-//    // store path
-//
-//    int max_flow = 0; // There is no flow initially
-//
-//    // Augment the flow while tere is path from source to
-//    // sink
-//    while (bfs(rGraph, s, t, parent)) {
-//        // Find minimum residual capacity of the edges along
-//        // the path filled by BFS. Or we can say find the
-//        // maximum flow through the path found.
-//        double path_flow = DBL_MAX;
-//        for (v = t; v != s; v = parent[v]) {
-//            u = parent[v];
-//            path_flow = path_flow < rGraph[u][v] ? path_flow : rGraph[u][v];
-//        }
-//
-//        // update residual capacities of the edges and
-//        // reverse edges along the path
-//        for (v = t; v != s; v = parent[v]) {
-//            u = parent[v];
-//            rGraph[u][v] -= path_flow;
-//            rGraph[v][u] += path_flow;
-//        }
-//
-//        // Add path flow to overall flow
-//        max_flow += path_flow;
-//    }
-//
-//    // Return the overall flow
-//    return max_flow;
-//}
+Graph* cloneGraph(Graph* graph) {
+    Graph* newGraph = createGraph();
+
+    char* name;
+    Node* node;
+    Info* info;
+    int len;
+
+    for (int i = 0; i < graph->count; i++) {
+        node = graph->adjList + i;
+        len = strlen(node->info->name) + 1;
+        name = (char*) malloc(sizeof(char) * len);
+        memcpy(name, node->info->name, len);
+
+        info = createInfo(name, node->info->x, node->info->y);
+        addVert(newGraph, info);
+    }
+
+
+    GraphNode* gNode;
+    for (int i = 0; i < graph->count; i++) {
+        node = graph->adjList + i;
+        gNode = node->list;
+        while(gNode) {
+            addGNode(node, gNode->node);
+            gNode = gNode->next;
+        }
+    }
+
+    return newGraph;
+}
+
+Graph* getRandomGraph(int count) {
+    Graph* graph = createGraph();
+    char* name;
+    Info* info;
+    for (int i = 0; i < count; i++) {
+        name = (char*) malloc(sizeof(char) * 2);
+        name[0] = (char) ( '0' + i );
+        name[1] = '\0';
+
+        info = createInfo(name, i, i);
+        addVert(graph, info);
+    }
+
+    srand(time(NULL));
+
+    Node* node;
+    for (int i = 0; i < count; i++) {
+        node = graph->adjList + i;
+        for (int j = 0; j < count; j++) {
+            //   Вероятность 25%
+            if (rand() % 4 == 0)
+                addGNode(node, graph->adjList + j);
+        }
+    }
+
+    return graph;
+}
