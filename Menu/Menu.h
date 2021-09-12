@@ -28,8 +28,9 @@
                     "8. Read from file\n"           \
                     "9. Breadth first search\n"     \
                     "10. Dijkstra\n"                \
-                    "11. Random graph\n"            \
-                    "12. Timing\n"                  \
+                    "11. Flow network\n"            \
+                    "12. Random graph\n"            \
+                    "13. Timing\n"                  \
                     "0. exit\n"                     \
 
 
@@ -64,6 +65,8 @@ void writeGraph(Graph* graph);
 void startBFS(Graph* graph);
 //  Обёртка. Дейкстра
 void dijkstraAlg(Graph* graph);
+//  Обёртка. Форд-Фалкерсон
+void flowNetwork(Graph* graph);
 //  Обёртка. Генерация рандомного графа
 void randomGraph(Graph** graph);
 //  Таймирование

@@ -76,10 +76,14 @@ void menu() {
                 break;
             }
             case 11: {
-                randomGraph(&graph);
+                flowNetwork(graph);
                 break;
             }
             case 12: {
+                randomGraph(&graph);
+                break;
+            }
+            case 13: {
                 timing();
                 break;
             }
@@ -430,7 +434,7 @@ void startBFS(Graph* graph) {
         return;
     }
 
-    bool result = bfs(graph, node, nodeToFind);
+    bool result = bfs(graph, node, nodeToFind, NULL);
 
     if (result == true)
         printf("\n%s%s is reachable from %s%s\n\n", GRN, toFind, name, WHT);
@@ -556,7 +560,7 @@ void timing() {
 
     for (i = 0; i < count; i++)
         for (int j = 0; j < count; j++)
-            bfs(graph, graph->adjList + i, graph->adjList + j);
+            bfs(graph, graph->adjList + i, graph->adjList + j, NULL);
 
     end = clock();
 
@@ -582,4 +586,52 @@ void timing() {
 
     printf("Time of element deleting: %f * 10^-3\n\n", (double)(end - begin) * 1000 / CLOCKS_PER_SEC);
     free(infoArr);
+}
+
+void flowNetwork(Graph* graph) {
+    if (!graph) {
+        throwError("Graph is empty!");
+        return;
+    }
+    printf("Enter name of the vertex to start finding from: ");
+    char* name = getStr();
+    printf("Enter name of the vertex to find: ");
+    char* toFind = getStr();
+
+    Node* node = findVert(graph, name);
+    if (!node) {
+        throwError("Vertex doesn't exist!");
+        return;
+    }
+
+    Node* nodeToFind = findVert(graph, toFind);
+    if (!nodeToFind) {
+        throwError("Vertex to find doesn't exist!");
+        return;
+    }
+
+    if (!strcmp(name, toFind)) {
+        throwError("These are the same node!");
+        return;
+    }
+
+    double** result = fordFulkerson(graph, indexOfNode(graph, node), indexOfNode(graph, nodeToFind));
+
+    for (int i = 0; i < graph->count; ++i) {
+        printf("\"%.6s\"  ", (graph->adjList[i]).info->name) ;
+    }
+    printf("\n");
+
+    for (int i = 0; i < graph->count; ++i) {
+        for (int j = 0; j < graph->count; ++j) {
+            printf("%lf ", result[i][j]);
+        }
+        printf("\n");
+    }
+    printf("\n");
+
+    for (int i = 0; i < graph->count; ++i) {
+        free(result[i]);
+    }
+    free(result);
 }

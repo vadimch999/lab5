@@ -261,13 +261,15 @@ int indexOfNode(Graph* graph, Node* node) {
     return index;
 }
 
-bool bfs(Graph* graph, Node* node, Node* nodeToFind) {
+bool bfs(Graph* graph, Node* node, Node* nodeToFind, int* parent) {
     int vertex = indexOfNode(graph, node);
 
     Queue* queue = createQueue(graph->count);
     int* visited = (int*) calloc(graph->count, sizeof(int));
 
     visited[vertex] = 1;
+    if (parent)
+        parent[vertex] = -1;
     enqueue(queue, vertex);
     GraphNode* temp;
 
@@ -279,6 +281,8 @@ bool bfs(Graph* graph, Node* node, Node* nodeToFind) {
         while (temp) {
             int adjVertex = indexOfNode(graph, temp->node);
             if (visited[adjVertex] == 0) {
+                if (parent)
+                    parent[adjVertex] = currentVertex;
 
                 if ( !strcmp(temp->node->info->name, nodeToFind->info->name) ) {
                     free(visited);
@@ -376,36 +380,30 @@ int minDistance(int V, double* dist, bool* sptSet)
     return min_index;
 }
 
-Graph* cloneGraph(Graph* graph) {
-    Graph* newGraph = createGraph();
-
-    char* name;
-    Node* node;
-    Info* info;
-    int len;
-
+double** cloneGraph(Graph* graph) {
+    double** rGraph = (double**) malloc(sizeof(double*) * graph->count);
     for (int i = 0; i < graph->count; i++) {
-        node = graph->adjList + i;
-        len = strlen(node->info->name) + 1;
-        name = (char*) malloc(sizeof(char) * len);
-        memcpy(name, node->info->name, len);
-
-        info = createInfo(name, node->info->x, node->info->y);
-        addVert(newGraph, info);
+        rGraph[i] = (double*) malloc(sizeof(double) * graph->count);
+        for (int j = 0; j < graph->count; j++)
+            rGraph[i][j] = 0;
     }
 
 
+    Node* node;
     GraphNode* gNode;
+    int index;
+
     for (int i = 0; i < graph->count; i++) {
         node = graph->adjList + i;
         gNode = node->list;
         while(gNode) {
-            addGNode(node, gNode->node);
+            index = indexOfNode(graph, gNode->node);
+            rGraph[i][index] = gNode->weight;
             gNode = gNode->next;
         }
     }
 
-    return newGraph;
+    return rGraph;
 }
 
 Graph* getRandomGraph(int count) {
@@ -434,4 +432,93 @@ Graph* getRandomGraph(int count) {
     }
 
     return graph;
+}
+
+double** fordFulkerson(Graph* graph, int s, int t)
+{
+
+    int u, v;
+
+    // Create a residual graph and fill the residual graph
+    // with given capacities in the original graph as
+    // residual capacities in residual graph
+    double** rGraph = cloneGraph(graph); // Residual graph where rGraph[i][j]
+    // indicates residual capacity of edge
+    // from i to j (if there is an edge. If
+    // rGraph[i][j] is 0, then there is not)
+
+    int* parent = (int*) malloc(sizeof(int) * graph->count); // This array is filled by BFS and to
+    // store path
+
+    double max_flow = 0; // There is no flow initially
+
+    // Augment the flow while tere is path from source to
+    // sink
+    while (bfsForFordFalk(rGraph, s, t, graph->count, parent)) {
+        // Find minimum residual capacity of the edges along
+        // the path filled by BFS. Or we can say find the
+        // maximum flow through the path found.
+
+        double path_flow = DBL_MAX;
+
+        for (v = t; v != s; v = parent[v]) {
+            u = parent[v];
+            path_flow = path_flow < rGraph[u][v] ? path_flow : rGraph[u][v];
+        }
+
+        // update residual capacities of the edges and
+        // reverse edges along the path
+        for (v = t; v != s; v = parent[v]) {
+            u = parent[v];
+            rGraph[u][v] -= path_flow;
+            rGraph[v][u] += path_flow;
+        }
+
+        // Add path flow to overall flow
+        max_flow += path_flow;
+    }
+
+    free(parent);
+
+    // Return the overall flow
+
+    printf("\nMax flow: %lf\n\n", max_flow);
+
+    return rGraph;
+}
+
+bool bfsForFordFalk(double** rGraph, int s, int t, int size, int* parent)
+{
+    int vertex = s;
+    int toFind = t;
+
+    Queue* queue = createQueue(size);
+    bool* visited = (bool*) malloc(sizeof(bool) * size);
+    memset(visited, false, size);
+
+    visited[vertex] = 1;
+    parent[vertex] = -1;
+    enqueue(queue, vertex);
+
+    while (!isEmpty(queue)) {
+        int currentVertex = dequeue(queue);
+
+        for (int adjVertex = 0; adjVertex < size; ++adjVertex) {
+            if (visited[adjVertex] == 0 && rGraph[currentVertex][adjVertex] > 0) {
+                parent[adjVertex] = currentVertex;
+
+                if ( adjVertex == toFind ) {
+                    free(visited);
+                    removeQueue(queue);
+                    return true;
+                }
+
+                visited[adjVertex] = 1;
+                enqueue(queue, adjVertex);
+            }
+        }
+    }
+    free(visited);
+    removeQueue(queue);
+    return false;
 }

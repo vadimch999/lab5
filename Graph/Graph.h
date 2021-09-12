@@ -49,7 +49,7 @@ Node* removeVert(Graph* graph, char* name);
 //  Удаление ребра в графе. Сложность O(N)
 Node* removeEdg(Graph* graph, char* from, char* to);
 //  Поиск в ширину. Сложность O(N^2)
-bool bfs(Graph* graph, Node* node, Node* nodeToFind);
+bool bfs(Graph* graph, Node* node, Node* nodeToFind, int* parent);
 //  Алгоритм Дейкстра. Сложность O(N^3)
 double dijkstra(Graph* graph, char* name, char* distName);
 
@@ -80,7 +80,9 @@ Graph* createGraph();
 //  Создаёт рандомный граф
 Graph* getRandomGraph(int count);
 
+double** fordFulkerson(Graph* graph, int s, int t);
+bool bfsForFordFalk(double** rGraph, int s, int t, int size, int* parent);
 //  Создаёт копию графа. Не используется.
-Graph* cloneGraph(Graph* graph);
+double** cloneGraph(Graph* graph);
 #include "../Queue/Queue.h"
 #endif
