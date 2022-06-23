@@ -86,7 +86,7 @@ double** cloneGraph(Graph* graph);
 
 //  Made by: bar1k4real
 //  Поиск минимального остова для невзвешанного неориенторованного графа.
-Graph* find_minimum_spanning_tree(Graph *graph, char *name);
+Graph* find_minimum_spanning_tree(Graph *graph);
 
 #include "../Queue/Queue.h"
 #endif

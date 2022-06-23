@@ -24,13 +24,11 @@
                     "4. Display graph\n"            \
                     "5. Remove vertex\n"            \
                     "6. Remove edge\n"              \
-                    "7. Write to file\n"            \
-                    "8. Read from file\n"           \
-                    "9. Breadth first search\n"     \
-                    "10. Dijkstra\n"                \
-                    "11. Flow network\n"            \
-                    "12. Random graph\n"            \
-                    "13. Timing\n"                  \
+                    "7. Breadth first search\n"     \
+                    "8. Dijkstra\n"                 \
+                    "9. MST\n"                      \
+                    "10. Random graph\n"            \
+                    "11. Timing\n"                  \
                     "0. exit\n"                     \
 
 
@@ -71,6 +69,8 @@ void flowNetwork(Graph* graph);
 void randomGraph(Graph** graph);
 //  Таймирование
 void timing();
+// MST algo
+void applyMST(Graph *graph);
 
 //  Чтение графа из файла
 Graph* readFromFile(char* path);

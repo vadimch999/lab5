@@ -534,7 +534,7 @@ bool bfsForFordFalk(double** rGraph, int s, int t, int size, int* parent)
     return false;
 }
 
-Graph* find_minimum_spanning_tree(Graph *graph, char *name) {
+Graph* find_minimum_spanning_tree(Graph *graph) {
     GraphNode *current_graph_node;
     int index;
     bool *used_vertices = (bool *) malloc(graph->count * sizeof(bool));
@@ -562,7 +562,6 @@ Graph* find_minimum_spanning_tree(Graph *graph, char *name) {
             current_graph_node = current_graph_node->next;
         }
     }
-
     Graph *spinning_tree = createGraph();
     for (int i = 0; i < graph->count; i++) {
         Info *info = graph->adjList[i].info;
@@ -571,6 +570,9 @@ Graph* find_minimum_spanning_tree(Graph *graph, char *name) {
 
     for (int i = 0; i < graph->count; i++)
         addEdge(spinning_tree, spinning_tree->adjList[parent_vertices[i]].info->name, spinning_tree->adjList[i].info->name);
+
+    free(used_vertices);
+    free(parent_vertices);
 
     return spinning_tree;
 }

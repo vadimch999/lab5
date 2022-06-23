@@ -24,11 +24,11 @@ char* getStr() {
 }
 
 void menu() {
-    Graph* graph = readFromFile(LOAD_PATH);
+    // Graph* graph = readFromFile(LOAD_PATH);
     int option = 1;
-
-    if (graph)
-        successMessage("Graph is loaded");
+    Graph* graph = createGraph();
+    // if (graph)
+    //    successMessage("Graph is loaded");
 
     while (option) {
         printf(textMenu);
@@ -60,42 +60,45 @@ void menu() {
                 break;
             }
             case 7: {
-                writeGraph(graph);
-                break;
-            }
-            case 8: {
-                readGraph(&graph);
-                break;
-            }
-            case 9: {
                 startBFS(graph);
                 break;
             }
-            case 10: {
+            case 8: {
                 dijkstraAlg(graph);
                 break;
             }
-            case 11: {
-                flowNetwork(graph);
+            case 9: {
+                applyMST(graph);
                 break;
             }
-            case 12: {
+            case 10: {
                 randomGraph(&graph);
                 break;
             }
-            case 13: {
+            case 11: {
                 timing();
                 break;
             }
             default: {
-                writeToFile(graph, LOAD_PATH);
-                successMessage("Graph is saved");
+            /*    writeToFile(graph, LOAD_PATH);
+                successMessage("Graph is saved"); */
                 deleteGraph(graph);
                 option = 0;
                 break;
             }
         }
     }
+}
+
+void applyMST(Graph *graph) {
+    if (!graph) {
+        throwError("Graph is empty!");
+        return;
+    }
+    success();
+    find_minimum_spanning_tree(graph);
+    printf("1111");
+    displayGraph(find_minimum_spanning_tree(graph));
 }
 
 int getInt(int min, int max) {
@@ -270,7 +273,7 @@ void deleteGraph(Graph* graph) {
     free(graph);
 }
 
-Graph* readFromFile(char* path) {
+/* Graph* readFromFile(char* path) {
     FILE* fp = fopen(path, "rb");
     if (!fp)
         return NULL;
@@ -320,7 +323,7 @@ Graph* readFromFile(char* path) {
     return graph;
 }
 
-void readGraph(Graph** graph) {
+ void readGraph(Graph** graph) {
     if (*graph) {
         printf("The existed graph will be erased. Continue?\n");
         printf("0. Yes\n1. No\n");
@@ -405,7 +408,7 @@ void writeGraph(Graph* graph) {
         success();
 
     free(path);
-}
+} */
 
 void startBFS(Graph* graph) {
     if (!graph) {
@@ -588,7 +591,7 @@ void timing() {
     free(infoArr);
 }
 
-void flowNetwork(Graph* graph) {
+/* void flowNetwork(Graph* graph) {
     if (!graph) {
         throwError("Graph is empty!");
         return;
@@ -634,4 +637,4 @@ void flowNetwork(Graph* graph) {
         free(result[i]);
     }
     free(result);
-}
+} */
