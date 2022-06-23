@@ -64,7 +64,6 @@ int indexOfNode(Graph* graph, Node* node);
 //  Возвращает минимальное расстояние в массиве
 int minDistance(int V, double* dist, bool* sptSet);
 
-
 //  Создаёт структуру информации.
 Info* createInfo(char* name, int x, int y);
 //  Создаёт узел списка смежности. Выделяет память
@@ -84,5 +83,10 @@ double** fordFulkerson(Graph* graph, int s, int t);
 bool bfsForFordFalk(double** rGraph, int s, int t, int size, int* parent);
 //  Создаёт копию графа. Не используется.
 double** cloneGraph(Graph* graph);
+
+//  Made by: bar1k4real
+//  Поиск минимального остова для невзвешанного неориенторованного графа.
+Graph* find_minimum_spanning_tree(Graph *graph, char *name);
+
 #include "../Queue/Queue.h"
 #endif

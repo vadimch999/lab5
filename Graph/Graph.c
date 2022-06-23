@@ -139,6 +139,17 @@ Node* findVert(Graph* graph, char* name) {
     return NULL;
 }
 
+int findIndexOfVert(Graph* graph, char* name) {
+    if(!graph)
+        return -1;
+
+    for (int i = 0; i < graph->count; i++)
+        if(!strcmp(graph->adjList[i].info->name, name))
+            return i;
+
+    return -1;
+}
+
 GraphNode* addEdge(Graph* graph, char* out, char* in) {
     Node* nodeOut = findVert(graph, out);
     if (!nodeOut) {
@@ -521,4 +532,45 @@ bool bfsForFordFalk(double** rGraph, int s, int t, int size, int* parent)
     free(visited);
     removeQueue(queue);
     return false;
+}
+
+Graph* find_minimum_spanning_tree(Graph *graph, char *name) {
+    GraphNode *current_graph_node;
+    int index;
+    bool *used_vertices = (bool *) malloc(graph->count * sizeof(bool));
+    int *parent_vertices = (int *) malloc(graph->count * sizeof(int));
+
+    for (int i = 0; i < graph->count; i++) {
+        used_vertices[i] = false;
+        parent_vertices[i] = -1;
+    }
+
+    used_vertices[0] = true;
+    parent_vertices[0] = 0;
+
+    for (int i = 0; i < graph->count; i++) {
+        current_graph_node = graph->adjList[i].list;
+
+        while (current_graph_node != NULL) {
+            index = indexOfNode(graph, current_graph_node->node);
+
+            if (used_vertices[index] == false) {
+                used_vertices[index] = true;
+                parent_vertices[index] = i;
+            }
+
+            current_graph_node = current_graph_node->next;
+        }
+    }
+
+    Graph *spinning_tree = createGraph();
+    for (int i = 0; i < graph->count; i++) {
+        Info *info = graph->adjList[i].info;
+        addVert(spinning_tree, info);
+    }
+
+    for (int i = 0; i < graph->count; i++)
+        addEdge(spinning_tree, spinning_tree->adjList[parent_vertices[i]].info->name, spinning_tree->adjList[i].info->name);
+
+    return spinning_tree;
 }
