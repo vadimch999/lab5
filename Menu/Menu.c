@@ -71,14 +71,14 @@ void menu() {
                 applyMST(graph);
                 break;
             }
-            case 10: {
+          /*  case 10: {
                 randomGraph(&graph);
                 break;
-            }
-            case 11: {
+            } */
+         /*   case 11: {
                 timing();
                 break;
-            }
+            } */
             default: {
             /*    writeToFile(graph, LOAD_PATH);
                 successMessage("Graph is saved"); */
@@ -151,13 +151,13 @@ void addNewVertex(Graph* graph) {
     }
 
 
-    printf("Enter coordinates\n");
-    printf("\tx: ");
-    int x = getInt(0, 0);
-    printf("\ty: ");
-    int y = getInt(0, 0);
+    //printf("Enter coordinates\n");
+    // printf("\tx: ");
+    // int x = getInt(0, 0);
+    // printf("\ty: ");
+    // int y = getInt(0, 0);
 
-    Info* info = createInfo(name, x, y);
+    Info* info = createInfo(name, 1, 1);
 
     if ( addVert(graph, info) )
         success();
@@ -173,7 +173,7 @@ void addNewEdge(Graph* graph) {
     printf("Enter name of the vertex for IN node: ");
     char* in = getStr();
 
-    if ( addEdge(graph, out, in) )
+    if ( addEdge(graph, out, in) && addEdge(graph, in, out))
         success();
 
     free(out);
@@ -201,7 +201,7 @@ void displayGraph(Graph* graph) {
         printf("\n");
 
         while (gNode) {
-            printf("\tname: %s; weight: %f;\n", gNode->node->info->name, gNode->weight);
+            printf("\tname: %s;\n", gNode->node->info->name);
             gNode = gNode->next;
         }
 
@@ -220,7 +220,7 @@ void removeVertex(Graph* graph) {
     printf("Enter the name of the vertex: ");
     char* name = getStr();
 
-    if ( !removeVert(graph, name) ) {
+    if ( !(graph, name) ) {
         free(name);
         return;
     }
@@ -241,7 +241,7 @@ void removeEdge(Graph* graph) {
     printf("Enter the name of the TO vertex: ");
     char* to = getStr();
 
-    if ( removeEdg(graph, from, to) ) {
+    if ( removeEdg(graph, from, to) && removeEdg(graph, to, from)) {
         free(from);
         free(to);
         success();
@@ -472,7 +472,7 @@ void dijkstraAlg(Graph* graph) {
     }
 }
 
-void randomGraph(Graph** graph) {
+/* void randomGraph(Graph** graph) {
     if (*graph) {
         printf("The existed graph will be erased. Continue?\n");
         printf("0. Yes\n1. No\n");
@@ -492,7 +492,7 @@ void randomGraph(Graph** graph) {
 
     if (*graph)
         success();
-}
+} */
 
 void timing() {
     int i, count;

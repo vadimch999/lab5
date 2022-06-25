@@ -246,11 +246,7 @@ Info* createInfo(char* name, int x, int y) {
 }
 
 double getWeight(Node* first, Node* second) {
-    int xDist = first->info->x - second->info->x;
-    int yDist = first->info->y - second->info->y;
-
-    //  Добавить с CMake в конец файла строчку: target_link_libraries(lab5 m)
-    return sqrt(xDist * xDist + yDist * yDist);
+   return 1;
 }
 
 int countEdges(Node* node) {

@@ -27,8 +27,6 @@
                     "7. Breadth first search\n"     \
                     "8. Dijkstra\n"                 \
                     "9. MST\n"                      \
-                    "10. Random graph\n"            \
-                    "11. Timing\n"                  \
                     "0. exit\n"                     \
 
 
