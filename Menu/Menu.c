@@ -219,8 +219,8 @@ void removeVertex(Graph* graph) {
 
     printf("Enter the name of the vertex: ");
     char* name = getStr();
-
-    if ( !(graph, name) ) {
+    
+    if ( !removeVert(graph, name) ) {
         free(name);
         return;
     }
